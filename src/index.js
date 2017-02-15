@@ -1,1 +1,1 @@
-export { default as DimplesWebSocket } from './SocketSubject'
+export { default as TryHardWebSocket } from './SocketSubject'

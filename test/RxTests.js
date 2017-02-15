@@ -5,146 +5,143 @@ import Rx from 'rxjs/Rx'
 
 const test = _test(tape)
 
- // Convert to use spies
-// test("Rx Concepts", (t) => {
-//   /*
-//     Observable: represents the idea of an invokable collection of future values or events.
-//   */
-//   t.test('simple observable with simple observer', (t) => {
-//     var obs = Rx.Observable.create((o) => {
-//       o.next()
-//     })
+// Convert to use spies
+test('Rx Concepts', (t) => {
+  /*
+    Observable: represents the idea of an invokable collection of future values or events.
+  */
+  t.test('simple observable with simple observer', (t) => {
+    var obs = Rx.Observable.create((o) => {
+      o.next()
+    })
 
-//     var observerSpy = sinon.spy()
+    var observerSpy = sinon.spy()
 
-//     obs.subscribe(observerSpy)
+    obs.subscribe(observerSpy)
 
-//     t.equal(observerSpy.calledOnce, true)
+    t.equal(observerSpy.calledOnce, true)
 
-//     t.end()
-//   })
+    t.end()
+  })
 
-//   t.test('simple observable with complete observer', (t) => {
-//     var obs = Rx.Observable.create((o) => {
-//       o.next()
-//       o.complete()
-//     })
+  t.test('simple observable with complete observer', (t) => {
+    var obs = Rx.Observable.create((o) => {
+      o.next()
+      o.complete()
+    })
 
-//     var nextSpy = sinon.spy()
-//     var completedSpy = sinon.spy()
+    var nextSpy = sinon.spy()
+    var completedSpy = sinon.spy()
 
-//     var simpleObserver = {
-//       next: nextSpy,
-//       complete: completedSpy
-//     }
+    var simpleObserver = {
+      next: nextSpy,
+      complete: completedSpy
+    }
 
-//     var subscription = obs.subscribe(simpleObserver)
-//     setTimeout((sub) => {
-//       sub.unsubscribe()
+    var subscription = obs.subscribe(simpleObserver)
+    setTimeout((sub) => {
+      sub.unsubscribe()
 
-//       t.equal(nextSpy.calledOnce, true)
-//       t.equal(completedSpy.calledOnce, true)
+      t.equal(nextSpy.calledOnce, true)
+      t.equal(completedSpy.calledOnce, true)
 
-//       t.end()
+      t.end()
+    }, 1000, subscription)
+  })
 
-//     }, 1000, subscription)
-//   })
+  t.test('connectable observerable', (t) => {
+    var obs = Rx.Observable.create((o) => {
+      o.next()
+      o.complete()
+    })
 
-//   t.test('connectable observerable', (t) => {
-//     var obs = Rx.Observable.create((o) => {
-//       o.next()
-//       o.complete()
-//     })
+    var conn = obs.publish()
 
-//     var conn = obs.publish()
+    var nextSpy = sinon.spy()
+    var completedSpy = sinon.spy()
 
-//     var nextSpy = sinon.spy()
-//     var completedSpy = sinon.spy()
+    conn.subscribe({
+      next: nextSpy,
+      complete: completedSpy
+    })
 
-//     conn.subscribe({
-//       next: nextSpy,
-//       complete: completedSpy
-//     })
+    setTimeout((o) => {
+      conn.connect()
 
-//     setTimeout((o) => {
-//       conn.connect()
+      t.equal(nextSpy.calledOnce, true)
+      t.equal(completedSpy.calledOnce, true)
 
-//       t.equal(nextSpy.calledOnce, true)
-//       t.equal(completedSpy.calledOnce, true)
+      t.end()
+    }, 2000, conn)
+  })
 
-//       t.end()
+  /*
+    Subscription: represents the execution of an Observable, is primarily useful for cancelling the execution.
+  */
+  t.test('subscription', (t) => {
+    var subSpy = sinon.spy()
 
-//     }, 2000, conn)
-//   })
+    var subscription = new Rx.Subscription(subSpy)
 
-//   /*
-//     Subscription: represents the execution of an Observable, is primarily useful for cancelling the execution.
-//   */
-//   t.test('subscription', (t) => {
+    subscription.add(subSpy)
 
-//     var subSpy = sinon.spy()
+    subscription.unsubscribe()
 
-//     var subscription = new Rx.Subscription(subSpy)
+    t.equal(subSpy.calledTwice, true)
 
-//     subscription.add(subSpy)
+    t.end()
+  })
 
-//     subscription.unsubscribe()
+  /*
+    Subject:
+  */
+  t.test('simple subject', (t) => {
+    var obsSpy = sinon.spy()
 
-//     t.equal(subSpy.calledTwice, true)
+    var subject = new Rx.Subject()
 
-//     t.end()
-//   })
+    subject.subscribe(obsSpy)
 
-//   /*
-//     Subject:
-//   */
-//   t.test('simple subject', (t) => {
-//     var obsSpy = sinon.spy()
+    subject.next('test 1')
+    subject.next('test 2')
+    subject.next('test 3')
 
-//     var subject = new Rx.Subject()
+    t.equal(obsSpy.calledThrice, true)
 
-//     subject.subscribe(obsSpy)
+    subject.complete()
 
-//     subject.next('test 1')
-//     subject.next('test 2')
-//     subject.next('test 3')
+    t.end()
+  })
 
-//     t.equal(obsSpy.calledThrice, true)
+  t.test('should confirm subject observerable is only called once', (t) => {
+    var obsSpy = sinon.spy()
 
-//     subject.complete()
+    var max = 2
 
-//     t.end()
-//   })
+    var internalObservable = new Rx.Observable.create((obs) => {
+      obsSpy()
+      var count = 0
+      var interval = setInterval(() => {
+        obs.next(count)
+        count += 1
+        if (count === max) {
+          obs.complete()
+        }
+      }, 1000)
+      return () => clearInterval(interval)
+    })
 
-//   t.test('should confirm subject observerable is only called once', (t) => {
-//     var obsSpy = sinon.spy()
+    var subject = new Rx.Subject()
 
-//     var max = 2
+    internalObservable.subscribe(subject)
 
-//     var internalObservable = new Rx.Observable.create((obs) => {    
-//         obsSpy()
-//         var count = 0
-//         var interval = setInterval(() => {
-//           obs.next(count)
-//           count += 1
-//           if (count === max){
-//             obs.complete()
-//           }
-//         }, 1000)
-//         return () => clearInterval(interval)
-//       })
+    subject.subscribe(sinon.spy())
 
-//     var subject = new Rx.Subject()
-
-//     internalObservable.subscribe(subject)
-
-//     subject.subscribe(sinon.spy())  
-
-//     subject.subscribe({
-//       complete: () => {
-//         t.equal(obsSpy.calledOnce, true)
-//         t.end()
-//       }
-//     })
-//   })
-// })
+    subject.subscribe({
+      complete: () => {
+        t.equal(obsSpy.calledOnce, true)
+        t.end()
+      }
+    })
+  })
+})
