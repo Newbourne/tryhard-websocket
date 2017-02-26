@@ -15,16 +15,16 @@ import TryHardWebSocket from './../src'
 var socket = new TryHardWebSocket({
  url: 'ws://localhost:1000',
  openObs: {
-  next: x => openObs(),
-  complete: () => openObsCompleted()
+  next: x => { /* do work */ },
+  complete: () => { /* done /* }
  }
 })
 
 socket.connect()
 
 socket.subscribe(
- (x) => { /* noop */ },
- (e) => { errObs() },
- () => { completeObs() }
+ (x) => { /* received message */ },
+ (e) => { /* error */ },
+ () => { /* done */ }
 )
 ```
