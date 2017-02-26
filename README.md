@@ -15,7 +15,7 @@ import TryHardWebSocket from './../src'
 var socket = new TryHardWebSocket({
  url: 'ws://localhost:1000',
  openObs: {
-  next: x => { /* do work */ }
+  next: x => { /* connection opened */ }
   // error: [ NOT SUPPORTED ]
   // complete: [ NOT SUPPORTED ]
  },
