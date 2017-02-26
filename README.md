@@ -20,8 +20,8 @@ var socket = new TryHardWebSocket({
   complete: [ NOT SUPPORTED ]
  },
  closedObs: {
-  next: x => { /* closed connection (cleanly) */ },
-  error: x => { /* connection closed, critical */ },
+  next: x => { /* connection closed (cleanly) */ },
+  error: x => { /* connection closed (critical) */ },
   complete: [ NOT SUPPORTED ]
  }
 })
