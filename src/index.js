@@ -1,1 +1,2 @@
-export { default as TryHardWebSocket } from './SocketSubject'
+import { default as TryHardWebSocket } from './SocketSubject'
+export default TryHardWebSocket

@@ -1,7 +1,8 @@
 export default class SocketDisposable {
-  constructor (socket, config, msgHandler, errHandler, closeHandler) {
+  constructor (socket, config, openHandler, msgHandler, errHandler, closeHandler) {
     this.socket = socket
     this.config = config
+    this.openFn = openHandler
     this.msgFn = msgHandler
     this.errFn = errHandler
     this.closeFn = closeHandler
@@ -11,6 +12,10 @@ export default class SocketDisposable {
     if (!this.isDisposed) {
       this.isDisposed = true
       this.close(this.socket, this.config.closeObs, null, null)
+
+      if (this.openFn) {
+        this.socket.removeEventListener('open', openHandler, false)
+      }
 
       this.socket.removeEventListener('message', this.msgFn, false)
       this.socket.removeEventListener('error', this.errFn, false)

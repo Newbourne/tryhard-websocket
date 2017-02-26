@@ -2,7 +2,7 @@ import tape from 'tape'
 import _test from 'tape-promise'
 import sinon from 'sinon'
 
-import { TryHardWebSocket } from './../src'
+import TryHardWebSocket from './../src'
 import { WebSocket, Server } from 'mock-socket'
 
 const test = _test(tape)
@@ -20,7 +20,7 @@ test('websocket tests', (t) => {
     // mockServer.close()
   })
 
-  t.test('should connect and trigger open observer once', (t) => {
+  t.test('should connect and trigger open observer next once (no complete)', (t) => {
     t.plan(4)
     var openObs = sinon.spy()
     var openObsCompleted = sinon.spy()
@@ -45,7 +45,7 @@ test('websocket tests', (t) => {
 
     setTimeout(() => {
       t.equal(openObs.calledOnce, true)
-      t.equal(openObsCompleted.calledOnce, true)
+      t.equal(openObsCompleted.notCalled, true)
       t.equal(errObs.notCalled, true)
       t.equal(completeObs.notCalled, true)
       t.end()
@@ -78,20 +78,30 @@ test('websocket tests', (t) => {
     }, 500)
   })
 
-  t.test('should handle connection error using main observer', (t) => {
-    t.plan(6)
+  t.test('should handle connection error using closed observer', (t) => {
+    t.plan(9)
+    var openObsNext = sinon.spy()
+    var openObsErr = sinon.spy()
+    var openObsComplete = sinon.spy()
+    
     var msgObs = sinon.spy()
     var errObs = sinon.spy()
     var completeObs = sinon.spy()
+
     var closeObsNext = sinon.spy()
     var closeObsErr = sinon.spy()
     var closeObsCompleted = sinon.spy()
 
     var socket = new TryHardWebSocket({
       url: 'ws://localhost:99999',
+      openObs: {
+        next: x => openObsNext(),
+        error: x => openObsErr(x),
+        complee: () => openObsComplete()
+      },
       closeObs: {
         next: x => closeObsNext(),
-        error: x => closeObsErr(x),
+        error: x => { closeObsErr(x); console.log(x) },
         complete: () => closeObsCompleted()
       }
     })
@@ -105,14 +115,18 @@ test('websocket tests', (t) => {
     )
 
     setTimeout(() => {
+      t.equal(openObsNext.notCalled, true)
+      t.equal(openObsErr.notCalled, true)
+      t.equal(openObsComplete.notCalled, true)
+
       t.equal(msgObs.notCalled, true)
       t.equal(errObs.calledOnce, true)
-        // complete not called on error
+
+      // complete not called on error
       t.equal(completeObs.notCalled, true)
-      t.equal(closeObsNext.notCalled, true)
+      t.equal(closeObsNext.calledOnce, true)
       t.equal(closeObsErr.notCalled, true)
-        // closed obs complete regardless of main obs result
-      t.equal(closeObsCompleted.calledOnce, true)
+      t.equal(closeObsCompleted.notCalled, true)
       t.end()
     }, 100)
   })

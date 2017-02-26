@@ -1,4 +1,4 @@
- // / NOT USED
+ // NOT USED
 export default class SocketHeart {
   constructor (subject) {
     this.subject = subject

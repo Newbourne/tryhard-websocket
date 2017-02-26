@@ -29,23 +29,17 @@ export default class SocketObservable {
       this.state.socket.addEventListener('error', errHandler, false)
       this.state.socket.addEventListener('close', closeHandler, false)
 
-      return new SocketDisposable(this.state.socket, config, msgHandler, errHandler, closeHandler)
+      return new SocketDisposable(this.state.socket, config, openHandler, msgHandler, errHandler, closeHandler)
     })
   }
   createOpenHandler (open, socket) {
     return function openHandler (e) {
       open.next(e)
-      open.complete()
-      socket.removeEventListener('open', openHandler, false)
     }
   }
   createMsgHandler (o) {
     return function msgHandler (e) {
-      if (e.data) {
-        o.next(e.data)
-      } else {
-        o.next(e)
-      }
+      o.next(e)
     }
   }
   createErrHandler (o) {
@@ -56,10 +50,11 @@ export default class SocketObservable {
   createCloseHandler (obs, closeObs) {
     return function closeHandler (e) {
       if (closeObs) {
-        closeObs.complete(e)
-      }
-      if (e.code !== 1000 || !e.wasClean) {
-        return obs.error(e)
+        if (e.code !== 1000 || !e.wasClean) {
+          closeObs.error(e)
+        } else {
+          closeObs.next(e)
+        }
       }
       obs.complete()
     }

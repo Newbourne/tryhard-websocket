@@ -5,7 +5,7 @@ import SocketObserver from './SocketObserver'
 const socketCfg = {
   url: null,
   protocol: null,
-  enableHearbeat: false,
+  heartbeat: false,
   openObs: null,
   closeObs: null
 }
@@ -32,8 +32,8 @@ export default class SocketSubject {
     this.state.socket.close()
   }
   subscribe (onNext, onError, onCompleted) {
-    if (!this.subject) {
-      throw new Error('No connection. Do you even lift bro?')
+    if (!this.subject && onError) {
+      return onError('No connection. Do you even lift bro?')
     }
     this.subject.subscribe(onNext, onError, onCompleted)
   }
