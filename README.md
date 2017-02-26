@@ -16,13 +16,13 @@ var socket = new TryHardWebSocket({
  url: 'ws://localhost:1000',
  openObs: {
   next: x => { /* do work */ }
-  error: [ NOT SUPPORTED ]
-  complete: [ NOT SUPPORTED ]
+  // error: [ NOT SUPPORTED ]
+  // complete: [ NOT SUPPORTED ]
  },
  closedObs: {
   next: x => { /* connection closed (cleanly) */ },
-  error: x => { /* connection closed (critical) */ },
-  complete: [ NOT SUPPORTED ]
+  error: x => { /* connection closed (critical) */ }
+  // complete: [ NOT SUPPORTED ]
  }
 })
 
