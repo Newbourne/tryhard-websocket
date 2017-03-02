@@ -33,4 +33,8 @@ socket.subscribe(
  (e) => { /* error */ },
  () => { /* done */ }
 )
+
+socket.send('HELP ME')
+socket.sendJson({ data: 'Welp' })
+
 ```
